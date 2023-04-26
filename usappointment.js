@@ -14,6 +14,8 @@ const axios = require('axios');
     const userToken = args.n;
     const groupAppointment = args.g;
     const region = args.r;
+    var counter = 0;
+    //const IS_PROD ='prod';
     //#endregion
 	
     //#region Helper functions
@@ -128,9 +130,9 @@ const axios = require('axios');
 
     async function runLogic() {
       //#region Init puppeteer
-      const browser = await puppeteer.launch();
+      //const browser = await puppeteer.launch();
       // Comment above line and uncomment following line to see puppeteer in action
-      //const browser = await puppeteer.launch({ headless: false });
+      const browser =  await puppeteer.launch({headless: false});
       const page = await browser.newPage();
       const timeout = 5000;
       const navigationTimeout = 60000;
@@ -151,6 +153,7 @@ const axios = require('axios');
       {
           const targetPage = page;
           await targetPage.goto('https://ais.usvisa-info.com/en-' + region + '/niv/users/sign_in', { waitUntil: 'domcontentloaded' });
+          counter = counter + 1;
       }
 
       // Click on username input
@@ -227,9 +230,15 @@ const axios = require('axios');
       // We are logged in now. Check available dates from the API
       {
           const targetPage = page;
-          const response = await targetPage.goto('https://ais.usvisa-info.com/en-' + region + '/niv/schedule/' + appointmentId + '/appointment/days/' + consularId + '.json?appointments[expedite]=false');
+          await targetPage.setExtraHTTPHeaders({
+            'Accept': 'application/json, text/javascript, */*; q=0.01',
+            'X-Requested-With': 'XMLHttpRequest'
+          });
+          //const response = await targetPage.goto('https://ais.usvisa-info.com/en-' + region + '/niv/schedule/' + appointmentId + '/appointment/days/' + consularId + '.json?appointments[expedite]=false');
+          const response = await targetPage.goto('https://ais.usvisa-info.com/en-'+region+'/niv/schedule/'+appointmentId+'/appointment/days/'+consularId+'.json?appointments%5Bexpedite%5D=false');
 
           const availableDates = JSON.parse(await response.text());
+          console.log(availableDates);
 
           if (availableDates.length <= 0) {
             log("There are no available dates for consulate with id " + consularId);
@@ -241,7 +250,19 @@ const axios = require('axios');
 
           if (firstDate > currentDate) {
             log("There is not an earlier date available than " + currentDate.toISOString().slice(0,10));
+            console.log(counter);
             await browser.close();
+
+            if (counter == 5){
+              exec('C:\\Users\\rupen\\Desktop\\Batch.bat', (err, stdout, stderr) => {
+                if (err) {
+                console.error(err);
+                return;
+                }
+                console.log(stdout);
+            });
+            }
+            await sleep(30000);
             return false;
           }
 
