@@ -1,6 +1,7 @@
 const puppeteer = require('puppeteer');
 const parseArgs = require('minimist');
 const axios = require('axios');
+const {exec} = require('child_process');
 
 (async () => {
     //#region Command line args
@@ -251,18 +252,19 @@ const axios = require('axios');
           if (firstDate > currentDate) {
             log("There is not an earlier date available than " + currentDate.toISOString().slice(0,10));
             console.log(counter);
-            await browser.close();
-
-            if (counter == 5){
+            
+            if (counter%10==0){
               exec('C:\\Users\\rupen\\Desktop\\Batch.bat', (err, stdout, stderr) => {
                 if (err) {
                 console.error(err);
                 return;
                 }
                 console.log(stdout);
-            });
+              });
+              console.log("Changing VPN");
+              await sleep(30000);
             }
-            await sleep(30000);
+            await browser.close();
             return false;
           }
 
