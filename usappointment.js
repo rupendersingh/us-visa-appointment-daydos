@@ -1,6 +1,7 @@
 const puppeteer = require('puppeteer');
 const parseArgs = require('minimist');
 const axios = require('axios');
+const {exec} = require('child_process');
 
 (async () => {
     //#region Command line args
@@ -14,6 +15,8 @@ const axios = require('axios');
     const userToken = args.n;
     const groupAppointment = args.g;
     const region = args.r;
+    var counter = 0;
+    //const IS_PROD ='prod';
     //#endregion
 	
     //#region Helper functions
@@ -114,7 +117,7 @@ const axios = require('axios');
         return;
       }
 
-      const pushOverAppToken = 'a5o8qtigtvu3yyfaeehtnzfkm88zc9';
+      const pushOverAppToken = 'an3sa5jq4j6jvfij1bkrkwesk6s2g9';
       const apiEndpoint = 'https://api.pushover.net/1/messages.json';
       const data = {
         token: pushOverAppToken,
@@ -130,7 +133,7 @@ const axios = require('axios');
       //#region Init puppeteer
       const browser = await puppeteer.launch();
       // Comment above line and uncomment following line to see puppeteer in action
-      //const browser = await puppeteer.launch({ headless: false });
+      //const browser =  await puppeteer.launch({headless: false});
       const page = await browser.newPage();
       const timeout = 5000;
       const navigationTimeout = 60000;
@@ -138,7 +141,7 @@ const axios = require('axios');
       page.setDefaultTimeout(timeout);
       page.setDefaultNavigationTimeout(navigationTimeout);
       //#endregion
-
+    
       //#region Logic
 	  
       // Set the viewport to avoid elements changing places 
@@ -151,6 +154,7 @@ const axios = require('axios');
       {
           const targetPage = page;
           await targetPage.goto('https://ais.usvisa-info.com/en-' + region + '/niv/users/sign_in', { waitUntil: 'domcontentloaded' });
+          counter = counter + 1;
       }
 
       // Click on username input
@@ -227,12 +231,32 @@ const axios = require('axios');
       // We are logged in now. Check available dates from the API
       {
           const targetPage = page;
-          const response = await targetPage.goto('https://ais.usvisa-info.com/en-' + region + '/niv/schedule/' + appointmentId + '/appointment/days/' + consularId + '.json?appointments[expedite]=false');
+          await targetPage.setExtraHTTPHeaders({
+            'Accept': 'application/json, text/javascript, */*; q=0.01',
+            'X-Requested-With': 'XMLHttpRequest'
+          });
+          //const response = await targetPage.goto('https://ais.usvisa-info.com/en-' + region + '/niv/schedule/' + appointmentId + '/appointment/days/' + consularId + '.json?appointments[expedite]=false');
+          const response = await targetPage.goto('https://ais.usvisa-info.com/en-'+region+'/niv/schedule/'+appointmentId+'/appointment/days/'+consularId+'.json?appointments%5Bexpedite%5D=false');
 
           const availableDates = JSON.parse(await response.text());
+          console.log(availableDates);
 
           if (availableDates.length <= 0) {
-            log("There are no available dates for consulate with id " + consularId);
+            log("There are no available dates for consulate with id " + consularId)
+            console.log(counter);
+            //VPN Change code
+            if (counter%10==0){
+              exec('C:\\Users\\dell\\Desktop\\Batch.bat', (err, stdout, stderr) => {
+                if (err) {
+                console.error(err);
+                return;
+                }
+                console.log(stdout);
+              });
+              console.log("Changing VPN");
+              await sleep(30000);
+            }
+
             await browser.close();
             return false;
           }
@@ -241,6 +265,20 @@ const axios = require('axios');
 
           if (firstDate > currentDate) {
             log("There is not an earlier date available than " + currentDate.toISOString().slice(0,10));
+            console.log(counter);
+          
+          //VPN change code  
+            if (counter%10==0){
+              exec('C:\\Users\\dell\\Desktop\\Batch.bat', (err, stdout, stderr) => {
+                if (err) {
+                console.error(err);
+                return;
+                }
+                console.log(stdout);
+              });
+              console.log("Changing VPN");
+              await sleep(30000);
+            }
             await browser.close();
             return false;
           }
