@@ -131,9 +131,9 @@ const {exec} = require('child_process');
 
     async function runLogic() {
       //#region Init puppeteer
-      //const browser = await puppeteer.launch();
+      const browser = await puppeteer.launch();
       // Comment above line and uncomment following line to see puppeteer in action
-      const browser =  await puppeteer.launch({headless: false});
+      //const browser =  await puppeteer.launch({headless: false});
       const page = await browser.newPage();
       const timeout = 5000;
       const navigationTimeout = 60000;
@@ -242,7 +242,21 @@ const {exec} = require('child_process');
           console.log(availableDates);
 
           if (availableDates.length <= 0) {
-            log("There are no available dates for consulate with id " + consularId);
+            log("There are no available dates for consulate with id " + consularId)
+            console.log(counter);
+            //VPN Change code
+            if (counter%10==0){
+              exec('C:\\Users\\dell\\Desktop\\Batch.bat', (err, stdout, stderr) => {
+                if (err) {
+                console.error(err);
+                return;
+                }
+                console.log(stdout);
+              });
+              console.log("Changing VPN");
+              await sleep(30000);
+            }
+
             await browser.close();
             return false;
           }
@@ -252,9 +266,10 @@ const {exec} = require('child_process');
           if (firstDate > currentDate) {
             log("There is not an earlier date available than " + currentDate.toISOString().slice(0,10));
             console.log(counter);
-            
+          
+          //VPN change code  
             if (counter%10==0){
-              exec('C:\\Users\\rupen\\Desktop\\Batch.bat', (err, stdout, stderr) => {
+              exec('C:\\Users\\dell\\Desktop\\Batch.bat', (err, stdout, stderr) => {
                 if (err) {
                 console.error(err);
                 return;
