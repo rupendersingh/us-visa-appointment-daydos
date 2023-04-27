@@ -117,7 +117,7 @@ const {exec} = require('child_process');
         return;
       }
 
-      const pushOverAppToken = 'a5o8qtigtvu3yyfaeehtnzfkm88zc9';
+      const pushOverAppToken = 'an3sa5jq4j6jvfij1bkrkwesk6s2g9';
       const apiEndpoint = 'https://api.pushover.net/1/messages.json';
       const data = {
         token: pushOverAppToken,
@@ -141,7 +141,7 @@ const {exec} = require('child_process');
       page.setDefaultTimeout(timeout);
       page.setDefaultNavigationTimeout(navigationTimeout);
       //#endregion
-
+    
       //#region Logic
 	  
       // Set the viewport to avoid elements changing places 
