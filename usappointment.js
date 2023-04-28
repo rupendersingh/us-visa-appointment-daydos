@@ -127,6 +127,20 @@ const {exec} = require('child_process');
 
       await axios.post(apiEndpoint, data);
     }
+
+    async function changevpn(count){
+      if (counter%2==0){
+        exec('C:\\Users\\dell\\Desktop\\Batch.bat', (err, stdout, stderr) => {
+          if (err) {
+          console.error(err);
+          return;
+          }
+          console.log(stdout);
+        });
+        console.log("Changing VPN");
+        await sleep(30000);
+      }
+    }
     //#endregion
 
     async function runLogic() {
@@ -138,6 +152,7 @@ const {exec} = require('child_process');
       const timeout = 5000;
       const navigationTimeout = 60000;
       const smallTimeout = 100;
+      const stepTimeout = 5000;
       page.setDefaultTimeout(timeout);
       page.setDefaultNavigationTimeout(navigationTimeout);
       //#endregion
@@ -151,7 +166,10 @@ const {exec} = require('child_process');
       }
 
       // Go to login page
-      {
+      {   
+          const client = await page.target().createCDPSession();
+          await client.send('Network.clearBrowserCookies');
+          await client.send('Network.clearBrowserCache');
           const targetPage = page;
           await targetPage.goto('https://ais.usvisa-info.com/en-' + region + '/niv/users/sign_in', { waitUntil: 'domcontentloaded' });
           counter = counter + 1;
@@ -209,6 +227,7 @@ const {exec} = require('child_process');
               el.dispatchEvent(new Event('change', { bubbles: true }));
             }, passwordInput);
           }
+          await sleep(stepTimeout);
       }
 	  
       // Tick the checkbox for agreement
@@ -226,6 +245,7 @@ const {exec} = require('child_process');
           await scrollIntoViewIfNeeded(element, timeout);
           await element.click({ offset: { x: 34, y: 11.34375} });
           await targetPage.waitForNavigation();
+          await sleep(stepTimeout);
       }
 
       // We are logged in now. Check available dates from the API
@@ -244,19 +264,8 @@ const {exec} = require('child_process');
           if (availableDates.length <= 0) {
             log("There are no available dates for consulate with id " + consularId)
             console.log(counter);
-            //VPN Change code
-            if (counter%10==0){
-              exec('C:\\Users\\dell\\Desktop\\Batch.bat', (err, stdout, stderr) => {
-                if (err) {
-                console.error(err);
-                return;
-                }
-                console.log(stdout);
-              });
-              console.log("Changing VPN");
-              await sleep(30000);
-            }
-
+            //Change VPN 
+            changevpn(counter);
             await browser.close();
             return false;
           }
@@ -266,19 +275,7 @@ const {exec} = require('child_process');
           if (firstDate > currentDate) {
             log("There is not an earlier date available than " + currentDate.toISOString().slice(0,10));
             console.log(counter);
-          
-          //VPN change code  
-            if (counter%10==0){
-              exec('C:\\Users\\dell\\Desktop\\Batch.bat', (err, stdout, stderr) => {
-                if (err) {
-                console.error(err);
-                return;
-                }
-                console.log(stdout);
-              });
-              console.log("Changing VPN");
-              await sleep(30000);
-            }
+            changevpn(counter);
             await browser.close();
             return false;
           }
@@ -390,7 +387,14 @@ const {exec} = require('child_process');
       } catch (err){
         // Swallow the error and keep running in case we encountered an error.
       }
-
+      if (counter == 50){
+        await sleep(1800*1000);
+        console.log("cooling down for 30 minutes");
+      }
+      if (availableDates.length <= 0){
+        await sleep(4*3600*1000);
+        Console.log("cooling down for 4 hrs");
+      }
       await sleep(retryTimeout);
     }
 })();
