@@ -16,6 +16,7 @@ const {exec} = require('child_process');
     const groupAppointment = args.g;
     const region = args.r;
     var counter = 0;
+    const datesArray = 0;
     //const IS_PROD ='prod';
     //#endregion
 	
@@ -145,14 +146,14 @@ const {exec} = require('child_process');
 
     async function runLogic() {
       //#region Init puppeteer
-      const browser = await puppeteer.launch();
+      //const browser = await puppeteer.launch();
       // Comment above line and uncomment following line to see puppeteer in action
-      //const browser =  await puppeteer.launch({headless: false});
+      const browser =  await puppeteer.launch({headless: false});
       const page = await browser.newPage();
       const timeout = 5000;
       const navigationTimeout = 60000;
       const smallTimeout = 100;
-      const stepTimeout = 5000;
+      const stepTimeout = 0;
       page.setDefaultTimeout(timeout);
       page.setDefaultNavigationTimeout(navigationTimeout);
       //#endregion
@@ -260,6 +261,7 @@ const {exec} = require('child_process');
 
           const availableDates = JSON.parse(await response.text());
           console.log(availableDates);
+          //datesArray = availableDates;
 
           if (availableDates.length <= 0) {
             log("There are no available dates for consulate with id " + consularId)
@@ -267,6 +269,8 @@ const {exec} = require('child_process');
             //Change VPN 
             changevpn(counter);
             await browser.close();
+            console.log("Cooling down for 4 hrs");
+            await sleep(4*3600*1000);
             return false;
           }
           
@@ -388,12 +392,8 @@ const {exec} = require('child_process');
         // Swallow the error and keep running in case we encountered an error.
       }
       if (counter == 50){
-        await sleep(1800*1000);
         console.log("cooling down for 30 minutes");
-      }
-      if (availableDates.length <= 0){
-        await sleep(4*3600*1000);
-        Console.log("cooling down for 4 hrs");
+        await sleep(1800*1000);
       }
       await sleep(retryTimeout);
     }
