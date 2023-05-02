@@ -130,8 +130,8 @@ const {exec} = require('child_process');
     }
 
     async function changevpn(count){
-      if (counter%2==0){
-        exec('C:\\Users\\dell\\Desktop\\Batch.bat', (err, stdout, stderr) => {
+      if (counter%10==0){
+        exec('C:\\Users\\rupen\\Desktop\\Batch.bat', (err, stdout, stderr) => {
           if (err) {
           console.error(err);
           return;
@@ -270,6 +270,7 @@ const {exec} = require('child_process');
             changevpn(counter);
             await browser.close();
             console.log("Cooling down for 4 hrs");
+            counter = 0;
             await sleep(4*3600*1000);
             return false;
           }
@@ -391,7 +392,7 @@ const {exec} = require('child_process');
       } catch (err){
         // Swallow the error and keep running in case we encountered an error.
       }
-      if (counter == 50){
+      if (counter%50==0){
         console.log("cooling down for 30 minutes");
         await sleep(1800*1000);
       }
