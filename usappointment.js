@@ -146,9 +146,9 @@ const {exec} = require('child_process');
 
     async function runLogic() {
       //#region Init puppeteer
-      //const browser = await puppeteer.launch();
+      const browser = await puppeteer.launch();
       // Comment above line and uncomment following line to see puppeteer in action
-      const browser =  await puppeteer.launch({headless: false});
+      //const browser =  await puppeteer.launch({headless: false});
       const page = await browser.newPage();
       const timeout = 5000;
       const navigationTimeout = 60000;
@@ -271,7 +271,7 @@ const {exec} = require('child_process');
             await browser.close();
             console.log("Cooling down for 4 hrs");
             counter = 0;
-            await sleep(4*3600*1000);
+            await sleep(1*3600*1000);
             return false;
           }
           
