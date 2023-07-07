@@ -5,7 +5,7 @@ const {exec} = require('child_process');
 
 (async () => {
     //#region Command line args
-    const args = parseArgs(process.argv.slice(2), {string: ['u', 'p', 'c', 'a', 'n', 'f' ,'d', 'r'], boolean: ['g']})
+    const args = parseArgs(process.argv.slice(2), {string: ['u', 'p', 'c', 'a', 'n', 'f', 'd', 'r'], boolean: ['g']})
     const currentDate = new Date(args.d);
     const fromDate = new Date(args.f);
     const usernameInput = args.u;
@@ -16,16 +16,6 @@ const {exec} = require('child_process');
     const userToken = args.n;
     const groupAppointment = args.g;
     const region = args.r;
-    /*const currentDate = new Date('2025-07-31');
-    const fromDate = new Date('2023-06-01');
-    const usernameInput = 'sukiratk1@gmail.com';
-    const passwordInput = 'ilovepunjab007';
-    const appointmentId = '48199117';
-    const retryTimeout = 120 * 1000;
-    const consularId = '94';
-    const userToken = 'uynen3cxhphtie6ng33r1ekufzmu57';
-    const groupAppointment = false;
-    const region = 'ca';*/
     var counter = 0;
     let earliestDate = new Date('2025-08-08');
     const datesArray = 0;
@@ -159,7 +149,7 @@ const {exec} = require('child_process');
     async function runLogic() {
       //#region Init puppeteer
       const browser = await puppeteer.launch();
-      //Comment above line and uncomment following line to see puppeteer in action
+      // Comment above line and uncomment following line to see puppeteer in action
       //const browser =  await puppeteer.launch({headless: false});
       const page = await browser.newPage();
       const timeout = 5000;
@@ -272,7 +262,7 @@ const {exec} = require('child_process');
           const response = await targetPage.goto('https://ais.usvisa-info.com/en-'+region+'/niv/schedule/'+appointmentId+'/appointment/days/'+consularId+'.json?appointments%5Bexpedite%5D=false');
 
           const availableDates = JSON.parse(await response.text());
-          //console.log(availableDates);
+          console.log(availableDates);
           //datesArray = availableDates;
 
           if (availableDates.length <= 0) {
@@ -306,13 +296,13 @@ const {exec} = require('child_process');
           }
 
           notify("Found an earlier date! " + firstDate.toISOString().slice(0,10));
-      } 
+      }    
 
       // Go to appointment page
       {
           const targetPage = page;
           await targetPage.goto('https://ais.usvisa-info.com/en-' + region + '/niv/schedule/' + appointmentId + '/appointment', { waitUntil: 'domcontentloaded' });
-          //await sleep(500);
+          await sleep(1000);
       }     
 
       // Select multiple people if it is a group appointment
@@ -322,7 +312,7 @@ const {exec} = require('child_process');
             const element = await waitForSelectors([["aria/Continue"],["#main > div.mainContent > form > div:nth-child(3) > div > input"]], targetPage, { timeout, visible: true });
             await scrollIntoViewIfNeeded(element, timeout);
             await element.click({ offset: { x: 70.515625, y: 25.25} });
-            //await sleep(1000);
+            await sleep(1000);
           }
       }
 
@@ -330,18 +320,18 @@ const {exec} = require('child_process');
       {
           const targetPage = page;
           const element = await waitForSelectors([["aria/Consular Section Appointment","aria/[role=\"combobox\"]"],["#appointments_consulate_appointment_facility_id"]], targetPage, { timeout, visible: true });
-          //await scrollIntoViewIfNeeded(element, timeout);    
+          await scrollIntoViewIfNeeded(element, timeout);    
           await page.select("#appointments_consulate_appointment_facility_id", consularId);
-          //await sleep(500);
+          await sleep(1000);
       }
 
       // Click on date input
       {
           const targetPage = page;
           const element = await waitForSelectors([["aria/Date of Appointment *"],["#appointments_consulate_appointment_date"]], targetPage, { timeout, visible: true });
-          //await scrollIntoViewIfNeeded(element, timeout);
+          await scrollIntoViewIfNeeded(element, timeout);
           await element.click({ offset: { x: 394.5, y: 17.53125} });
-          //await sleep(500);
+          await sleep(1000);
       }
 
       // Keep clicking next button until we find the first available date and click to that date
@@ -350,33 +340,15 @@ const {exec} = require('child_process');
           while (true) {
             try {
               const element = await waitForSelectors([["aria/25[role=\"link\"]"],["#ui-datepicker-div > div.ui-datepicker-group.ui-datepicker-group > table > tbody > tr > td.undefined > a"]], targetPage, { timeout:smallTimeout, visible: true });
-              
-              const targetSelector = '#ui-datepicker-div > div.ui-datepicker-group.ui-datepicker-group > table > tbody > tr > td.undefined > a';
-              //Getting the date on the UI
-              const avaiblabeDate = await page.evaluate(targetSelector => {
-                const element = document.querySelector(targetSelector);
-                return element ? element.textContent : null;
-              }, targetSelector);
-              const compDate = (earliestDate.toISOString().slice(8,10))*1;
-              console.log("API Date = ", compDate);
-              console.log("UI Date", avaiblabeDate);
-
-              //Comparing date from API and UI
-              if(avaiblabeDate==compDate){
-                //await scrollIntoViewIfNeeded(element, timeout);
-                await page.click('#ui-datepicker-div > div.ui-datepicker-group.ui-datepicker-group > table > tbody > tr > td.undefined > a');
-              }
-              else{
-                console.log("Dates do not match");
-                notify("Dates did not match");
-              }
+              await scrollIntoViewIfNeeded(element, timeout);
+              await page.click('#ui-datepicker-div > div.ui-datepicker-group.ui-datepicker-group > table > tbody > tr > td.undefined > a');
               await sleep(500);
               break;
             } catch (err) {
               {
                   const targetPage = page;
                   const element = await waitForSelectors([["aria/Next","aria/[role=\"generic\"]"],["#ui-datepicker-div > div.ui-datepicker-group.ui-datepicker-group-last > div > a > span"]], targetPage, { timeout, visible: true });
-                  //await scrollIntoViewIfNeeded(element, timeout);
+                  await scrollIntoViewIfNeeded(element, timeout);
                   await element.click({ offset: { x: 4, y: 9.03125} });
               }
             }
@@ -393,25 +365,25 @@ const {exec} = require('child_process');
             const event = new Event('change', {bubbles: true});
             document.querySelector('#appointments_consulate_appointment_time').dispatchEvent(event);
           })
-          //await sleep(1000);
+          await sleep(1000);
       }
 
       // Click on reschedule button
       {
           const targetPage = page;
           const element = await waitForSelectors([["aria/Reschedule"],["#appointments_submit"]], targetPage, { timeout, visible: true });
-          //await scrollIntoViewIfNeeded(element, timeout);
+          await scrollIntoViewIfNeeded(element, timeout);
           await element.click({ offset: { x: 78.109375, y: 20.0625} });
-          //await sleep(1000);
+          await sleep(1000);
       }
 
       // Click on submit button on the confirmation popup
       {
         const targetPage = page;
         const element = await waitForSelectors([["aria/Cancel"],["body > div.reveal-overlay > div > div > a.button.alert"]], targetPage, { timeout, visible: true });
-        //await scrollIntoViewIfNeeded(element, timeout);
+        await scrollIntoViewIfNeeded(element, timeout);
         await page.click('body > div.reveal-overlay > div > div > a.button.alert');
-        await sleep(1000);
+        await sleep(5000);
       }
 
       await browser.close();
